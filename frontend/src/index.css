@@ -1,0 +1,17 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #111b14;
+  color: #e2e8f0;
+}
+
+input[type="file"] {
+  border: 1px solid #243428;
+  border-radius: 8px;
+  padding: 8px;
+  background: #16241a;
+  color: #e2e8f0;
+}
