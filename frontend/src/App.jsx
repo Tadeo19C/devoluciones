@@ -35,10 +35,6 @@ export default function App() {
       maximumFractionDigits: 2,
     }).format(value || 0);
 
-  const formattedTotal = useMemo(() => {
-    return formatCurrency(dashboard.total_monto);
-  }, [dashboard.total_monto]);
-
   const formattedRefacturado = useMemo(() => {
     return formatCurrency(dashboard.total_refacturado);
   }, [dashboard.total_refacturado]);
@@ -149,11 +145,7 @@ export default function App() {
 
       <section className="metrics">
         <div className="card">
-          <span>Monto Total Devuelto</span>
-          <strong>{formattedTotal}</strong>
-        </div>
-        <div className="card">
-          <span>Monto Refacturado</span>
+          <span>Refacturado final</span>
           <strong>{formattedRefacturado}</strong>
         </div>
         <div className="card">
