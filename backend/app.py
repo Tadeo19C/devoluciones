@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import os
 from typing import Dict, List
 
@@ -8,16 +9,39 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MASTER_CSV = os.path.join(BASE_DIR, "Devoluciones_Febrero_Consolidado_Hasta_23.csv")
+MASTER_CSV = os.path.join(BASE_DIR, "DEVOLUCIONES_TOTALES_FEBRERO_2026.csv")
 
 app = Flask(__name__)
 CORS(app)
 
 
-def load_master() -> pd.DataFrame:
-    if not os.path.exists(MASTER_CSV):
+def read_csv_with_header(source) -> pd.DataFrame:
+    if isinstance(source, str):
+        if not os.path.exists(source):
+            return pd.DataFrame()
+        with open(source, "r", encoding="utf-8") as handle:
+            text = handle.read()
+    else:
+        raw = source.read()
+        if isinstance(raw, bytes):
+            text = raw.decode("utf-8", errors="ignore")
+        else:
+            text = str(raw)
+
+    lines = text.splitlines()
+    header_index = next(
+        (idx for idx, line in enumerate(lines) if line.strip().startswith("FECHA,")),
+        None,
+    )
+    if header_index is None:
         return pd.DataFrame()
-    return pd.read_csv(MASTER_CSV)
+
+    payload = "\n".join(lines[header_index:])
+    return pd.read_csv(io.StringIO(payload))
+
+
+def load_master() -> pd.DataFrame:
+    return read_csv_with_header(MASTER_CSV)
 
 
 def save_master(df: pd.DataFrame) -> None:
@@ -39,7 +63,7 @@ def upload_csv():
         return jsonify({"error": "Nombre de archivo inválido"}), 400
 
     try:
-        new_df = pd.read_csv(file)
+        new_df = read_csv_with_header(file)
     except Exception as exc:  # noqa: BLE001
         return jsonify({"error": f"CSV inválido: {exc}"}), 400
 
@@ -71,8 +95,14 @@ def dashboard():
     total_monto = float(monto_col.sum())
     total_tickets = int(len(df))
 
-    if "MONTO REFACTURACION" in df.columns:
-        refact_col = pd.to_numeric(df["MONTO REFACTURACION"], errors="coerce").fillna(0)
+    refact_column = None
+    for candidate in ("MONTO REFACTURACION", "MONTO REFACTURADO"):
+        if candidate in df.columns:
+            refact_column = candidate
+            break
+
+    if refact_column:
+        refact_col = pd.to_numeric(df[refact_column], errors="coerce").fillna(0)
         total_refacturado = float(refact_col.sum())
     else:
         total_refacturado = 0.0
