@@ -71,6 +71,12 @@ def dashboard():
     total_monto = float(monto_col.sum())
     total_tickets = int(len(df))
 
+    if "MONTO REFACTURACION" in df.columns:
+        refact_col = pd.to_numeric(df["MONTO REFACTURACION"], errors="coerce").fillna(0)
+        total_refacturado = float(refact_col.sum())
+    else:
+        total_refacturado = 0.0
+
     if "VENDEDOR" in df.columns:
         grouped = (
             df.assign(_monto=monto_col)
@@ -92,6 +98,7 @@ def dashboard():
 
     return jsonify({
         "total_monto": total_monto,
+        "total_refacturado": total_refacturado,
         "total_tickets": total_tickets,
         "por_vendedor": por_vendedor,
     })

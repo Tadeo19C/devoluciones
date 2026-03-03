@@ -11,17 +11,21 @@ import {
 import logo from "./assets/sinsa-logo.png";
 import "./App.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  `${window.location.protocol}//${window.location.hostname}:5000`;
 
 export default function App() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dashboard, setDashboard] = useState({
     total_monto: 0,
+    total_refacturado: 0,
     total_tickets: 0,
     por_vendedor: [],
   });
   const [error, setError] = useState("");
+  const [selectedVendedor, setSelectedVendedor] = useState("");
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("es-NI", {
@@ -35,15 +39,38 @@ export default function App() {
     return formatCurrency(dashboard.total_monto);
   }, [dashboard.total_monto]);
 
+  const formattedRefacturado = useMemo(() => {
+    return formatCurrency(dashboard.total_refacturado);
+  }, [dashboard.total_refacturado]);
+
   const topVendedores = useMemo(() => {
     return [...dashboard.por_vendedor].slice(0, 5);
   }, [dashboard.por_vendedor]);
 
-  const topVendor = topVendedores[0];
+  useEffect(() => {
+    if (!dashboard.por_vendedor.length) {
+      setSelectedVendedor("");
+      return;
+    }
+    const hasSelection = dashboard.por_vendedor.some(
+      (item) => item.vendedor === selectedVendedor
+    );
+    if (!selectedVendedor || !hasSelection) {
+      setSelectedVendedor(dashboard.por_vendedor[0].vendedor);
+    }
+  }, [dashboard.por_vendedor, selectedVendedor]);
+
+  const selectedVendor = useMemo(() => {
+    if (!selectedVendedor) return null;
+    return dashboard.por_vendedor.find(
+      (item) => item.vendedor === selectedVendedor
+    );
+  }, [dashboard.por_vendedor, selectedVendedor]);
+
   const topPercent = useMemo(() => {
-    if (!topVendor || !dashboard.total_monto) return 0;
-    return Math.min((topVendor.monto / dashboard.total_monto) * 100, 100);
-  }, [topVendor, dashboard.total_monto]);
+    if (!selectedVendor || !dashboard.total_monto) return 0;
+    return Math.min((selectedVendor.monto / dashboard.total_monto) * 100, 100);
+  }, [selectedVendor, dashboard.total_monto]);
 
   const fetchDashboard = async () => {
     try {
@@ -126,19 +153,40 @@ export default function App() {
           <strong>{formattedTotal}</strong>
         </div>
         <div className="card">
+          <span>Monto Refacturado</span>
+          <strong>{formattedRefacturado}</strong>
+        </div>
+        <div className="card">
           <span>Total de Tickets</span>
           <strong>{dashboard.total_tickets}</strong>
         </div>
         <div className="card card--highlight">
-          <span>Top vendedor (mes actual)</span>
-          <strong>{topVendor ? topVendor.vendedor : "-"}</strong>
+          <span>Vendedor seleccionado (mes actual)</span>
+          <div className="card__select">
+            <strong>{selectedVendor ? selectedVendor.vendedor : "-"}</strong>
+            <select
+              value={selectedVendedor}
+              onChange={(event) => setSelectedVendedor(event.target.value)}
+              disabled={!dashboard.por_vendedor.length}
+              aria-label="Selecciona un vendedor"
+            >
+              {dashboard.por_vendedor.map((item) => (
+                <option key={item.vendedor} value={item.vendedor}>
+                  {item.vendedor}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="card__meta">
-            <small>{topVendor ? `${topVendor.tickets} tickets` : ""}</small>
-            <em>{topVendor ? formatCurrency(topVendor.monto) : ""}</em>
+            <small>{selectedVendor ? `${selectedVendor.tickets} tickets` : ""}</small>
+            <em>{selectedVendor ? formatCurrency(selectedVendor.monto) : ""}</em>
           </div>
           <div className="meter">
             <div className="meter__fill" style={{ width: `${topPercent}%` }} />
           </div>
+          <small className="meter__label">
+            {selectedVendor ? `${topPercent.toFixed(1)}% del total` : ""}
+          </small>
         </div>
       </section>
 
