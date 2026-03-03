@@ -34,3 +34,18 @@ El frontend quedará disponible en `http://localhost:5173`.
 
 - `POST /upload`: recibe un CSV y lo concatena con el maestro.
 - `GET /dashboard`: devuelve métricas agregadas.
+
+## Despliegue (gratis)
+
+### Backend (Render)
+- Tipo: Web Service
+- Root: `backend`
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn wsgi:app`
+- Runtime: `python-3.11.8` (usa `backend/runtime.txt`)
+
+### Frontend (Vercel)
+- Root: `frontend`
+- Build command: `npm run build`
+- Output: `dist`
+- Env: `VITE_API_BASE` = URL pública de Render
