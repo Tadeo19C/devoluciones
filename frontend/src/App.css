@@ -219,3 +219,52 @@
   color: #fca5a5;
   border-radius: 10px;
 }
+
+@media (max-width: 900px) {
+  .app {
+    padding: 24px;
+  }
+
+  .app__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .brand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .upload {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .upload button {
+    width: 100%;
+  }
+
+  .chart__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 18px;
+  }
+
+  .brand__logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .app__header h1 {
+    font-size: 22px;
+  }
+
+  .card strong {
+    font-size: 20px;
+  }
+}
