@@ -18,6 +18,9 @@ const API_BASE =
 export default function App() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "dark";
+  });
   const [dashboard, setDashboard] = useState({
     total_monto: 0,
     total_refacturado: 0,
@@ -26,6 +29,11 @@ export default function App() {
   });
   const [error, setError] = useState("");
   const [selectedVendedor, setSelectedVendedor] = useState("");
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   const formatCurrency = (value) =>
     new Intl.NumberFormat("es-NI", {
@@ -138,6 +146,13 @@ export default function App() {
           <button type="submit" disabled={loading}>
             {loading ? "Subiendo..." : "Subir CSV"}
           </button>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? "Tono claro" : "Tono oscuro"}
+          </button>
         </form>
       </header>
 
@@ -191,15 +206,19 @@ export default function App() {
           <div className="chart__container">
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={dashboard.por_vendedor} margin={{ left: 12, right: 12 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                <XAxis dataKey="vendedor" tick={{ fill: "#94a3b8" }} />
-                <YAxis tick={{ fill: "#94a3b8" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--grid)" />
+                <XAxis dataKey="vendedor" tick={{ fill: "var(--text-muted)" }} />
+                <YAxis tick={{ fill: "var(--text-muted)" }} />
                 <Tooltip
                   formatter={(value) => formatCurrency(value)}
-                  contentStyle={{ background: "#0f1c15", borderRadius: 8, border: "1px solid #1f2a22" }}
-                  labelStyle={{ color: "#e2e8f0" }}
+                  contentStyle={{
+                    background: "var(--tooltip-bg)",
+                    borderRadius: 8,
+                    border: "1px solid var(--tooltip-border)",
+                  }}
+                  labelStyle={{ color: "var(--text)" }}
                 />
-                <Bar dataKey="monto" fill="#22c55e" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="monto" fill="var(--accent)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

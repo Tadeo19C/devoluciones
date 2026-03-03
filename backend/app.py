@@ -108,16 +108,22 @@ def dashboard():
         total_refacturado = 0.0
 
     if "VENDEDOR" in df.columns:
+        vendedor_clean = (
+            df["VENDEDOR"]
+            .astype(str)
+            .str.strip()
+            .str.replace(r"\s+", " ", regex=True)
+        )
         grouped = (
-            df.assign(_monto=monto_col)
-            .groupby("VENDEDOR", dropna=False)
-            .agg(monto=("_monto", "sum"), tickets=("VENDEDOR", "size"))
+            df.assign(_monto=monto_col, _vendedor=vendedor_clean)
+            .groupby("_vendedor", dropna=False)
+            .agg(monto=("_monto", "sum"), tickets=("_vendedor", "size"))
             .reset_index()
             .sort_values("monto", ascending=False)
         )
         por_vendedor: List[Dict[str, object]] = [
             {
-                "vendedor": str(row["VENDEDOR"]),
+                "vendedor": str(row["_vendedor"]),
                 "monto": float(row["monto"]),
                 "tickets": int(row["tickets"]),
             }
