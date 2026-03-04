@@ -158,6 +158,19 @@ export default function App() {
 
       {error && <div className="error">{error}</div>}
 
+      <a
+        className="cta"
+        href="https://docs.google.com/spreadsheets/d/10goNa5Ghkto2bhzamjK4nitiZtt04WAOfORwCr53Y6E/edit?usp=sharing"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <div>
+          <span>Excel maestro con toda la data</span>
+          <strong>Ver hoja en Google Sheets</strong>
+        </div>
+        <span className="cta__arrow" aria-hidden="true">→</span>
+      </a>
+
       <section className="metrics">
         <div className="card">
           <span>Refacturado final</span>
