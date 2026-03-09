@@ -24,6 +24,7 @@ export default function App() {
   const [dashboard, setDashboard] = useState({
     total_monto: 0,
     total_refacturado: 0,
+    total_perdida: 0,
     total_tickets: 0,
     por_vendedor: [],
   });
@@ -46,6 +47,14 @@ export default function App() {
   const formattedRefacturado = useMemo(() => {
     return formatCurrency(dashboard.total_refacturado);
   }, [dashboard.total_refacturado]);
+
+  const formattedTotalMonto = useMemo(() => {
+    return formatCurrency(dashboard.total_monto);
+  }, [dashboard.total_monto]);
+
+  const formattedPerdida = useMemo(() => {
+    return formatCurrency(dashboard.total_perdida);
+  }, [dashboard.total_perdida]);
 
   const topVendedores = useMemo(() => {
     return [...dashboard.por_vendedor].slice(0, 5);
@@ -173,10 +182,18 @@ export default function App() {
 
       <section className="metrics">
         <div className="card">
+          <span>Total de devoluciones</span>
+          <strong>{formattedTotalMonto}</strong>
+        </div>
+        <div className="card">
+          <span>Total de perdida</span>
+          <strong>{formattedPerdida}</strong>
+        </div>
+        <div className="card">
           <span>Refacturado final</span>
           <strong>{formattedRefacturado}</strong>
         </div>
-        <div className="card">
+        <div className="card card--tickets">
           <span>Total de Tickets</span>
           <strong>{dashboard.total_tickets}</strong>
         </div>

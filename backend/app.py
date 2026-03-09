@@ -84,6 +84,8 @@ def dashboard():
     if df.empty:
         return jsonify({
             "total_monto": 0,
+            "total_refacturado": 0,
+            "total_perdida": 0,
             "total_tickets": 0,
             "por_vendedor": [],
         })
@@ -106,6 +108,8 @@ def dashboard():
         total_refacturado = float(refact_col.sum())
     else:
         total_refacturado = 0.0
+
+    total_perdida = float(total_monto - total_refacturado)
 
     if "VENDEDOR" in df.columns:
         vendedor_clean = (
@@ -135,6 +139,7 @@ def dashboard():
     return jsonify({
         "total_monto": total_monto,
         "total_refacturado": total_refacturado,
+        "total_perdida": total_perdida,
         "total_tickets": total_tickets,
         "por_vendedor": por_vendedor,
     })
