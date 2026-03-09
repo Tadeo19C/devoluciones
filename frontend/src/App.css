@@ -242,11 +242,13 @@
   display: grid;
   gap: 10px;
   grid-column: span 2;
+  text-align: center;
+  justify-items: center;
 }
 
 .card__select {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   justify-items: center;
   text-align: center;
