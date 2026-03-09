@@ -245,16 +245,14 @@
 }
 
 .card__select {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  display: grid;
+  gap: 10px;
+  align-items: start;
 }
 
 .card__select strong {
   font-size: 18px;
-  max-width: 65%;
+  max-width: 100%;
   word-break: break-word;
 }
 
@@ -265,7 +263,7 @@
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .card__meta {
