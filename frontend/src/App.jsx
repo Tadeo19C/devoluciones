@@ -52,9 +52,15 @@ export default function App() {
     return formatCurrency(dashboard.total_monto);
   }, [dashboard.total_monto]);
 
+  const rawPerdida = useMemo(() => {
+    const fallback = dashboard.total_monto - dashboard.total_refacturado;
+    const value = dashboard.total_perdida ?? fallback;
+    return Number.isFinite(value) ? value : 0;
+  }, [dashboard.total_monto, dashboard.total_refacturado, dashboard.total_perdida]);
+
   const formattedPerdida = useMemo(() => {
-    return formatCurrency(dashboard.total_perdida);
-  }, [dashboard.total_perdida]);
+    return formatCurrency(rawPerdida);
+  }, [rawPerdida]);
 
   const topVendedores = useMemo(() => {
     return [...dashboard.por_vendedor].slice(0, 5);

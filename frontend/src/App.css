@@ -241,13 +241,21 @@
 .card--highlight {
   display: grid;
   gap: 10px;
+  grid-column: span 2;
 }
 
 .card__select {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.card__select strong {
+  font-size: 18px;
+  max-width: 65%;
+  word-break: break-word;
 }
 
 .card__select select {
@@ -257,6 +265,7 @@
   padding: 6px 10px;
   border-radius: 8px;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .card__meta {
@@ -268,6 +277,12 @@
 .card__meta em {
   color: var(--accent-2);
   font-style: normal;
+}
+
+@media (max-width: 900px) {
+  .card--highlight {
+    grid-column: span 1;
+  }
 }
 
 .meter {
