@@ -249,6 +249,10 @@
   padding: 16px;
 }
 
+.card--highlight span {
+  margin-bottom: 2px;
+}
+
 .card__select {
   display: grid;
   gap: 8px;
@@ -275,7 +279,8 @@
 
 .card__meta {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 14px;
   color: var(--text-muted);
 }
 
