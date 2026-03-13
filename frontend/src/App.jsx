@@ -21,6 +21,10 @@ export default function App() {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "dark";
   });
+  const [months, setMonths] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [uploadMonth, setUploadMonth] = useState("");
+  const [uploadMode, setUploadMode] = useState("replace");
   const [dashboard, setDashboard] = useState({
     total_monto: 0,
     total_refacturado: 0,
@@ -91,10 +95,14 @@ export default function App() {
     return Math.min((selectedVendor.monto / dashboard.total_monto) * 100, 100);
   }, [selectedVendor, dashboard.total_monto]);
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = async (month) => {
     try {
       setError("");
-      const response = await fetch(`${API_BASE}/dashboard`);
+      const url = new URL(`${API_BASE}/dashboard`);
+      if (month) {
+        url.searchParams.set("month", month);
+      }
+      const response = await fetch(url);
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Error al cargar dashboard");
@@ -105,9 +113,30 @@ export default function App() {
     }
   };
 
+  const fetchMonths = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/months`);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Error al cargar meses");
+      }
+      const monthList = Array.isArray(data.months) ? data.months : [];
+      setMonths(monthList);
+      if (!selectedMonth) {
+        setSelectedMonth(data.selected || monthList[0] || "");
+      }
+    } catch (err) {
+      setError(err.message || "Error desconocido");
+    }
+  };
+
   useEffect(() => {
-    fetchDashboard();
+    fetchMonths();
   }, []);
+
+  useEffect(() => {
+    fetchDashboard(selectedMonth);
+  }, [selectedMonth]);
 
   const handleUpload = async (event) => {
     event.preventDefault();
@@ -115,9 +144,15 @@ export default function App() {
       setError("Selecciona un archivo CSV");
       return;
     }
+    if (!uploadMonth.trim()) {
+      setError("Ingresa el mes a registrar");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("month", uploadMonth.trim());
+    formData.append("mode", uploadMode);
 
     try {
       setLoading(true);
@@ -130,7 +165,9 @@ export default function App() {
       if (!response.ok) {
         throw new Error(data.error || "Error al subir CSV");
       }
-      await fetchDashboard();
+      await fetchMonths();
+      setSelectedMonth(uploadMonth.trim());
+      await fetchDashboard(uploadMonth.trim());
       setFile(null);
     } catch (err) {
       setError(err.message || "Error desconocido");
@@ -148,7 +185,7 @@ export default function App() {
             <h1>Control de Devoluciones</h1>
             <p>
               Subes el CSV diario y revisa el estado actualizado.
-              <span className="badge">Mes por defecto: Febrero</span>
+              <span className="badge">Mes por defecto: mas reciente</span>
             </p>
           </div>
         </div>
@@ -158,6 +195,20 @@ export default function App() {
             accept=".csv"
             onChange={(event) => setFile(event.target.files?.[0] || null)}
           />
+          <input
+            type="text"
+            placeholder="Mes (Ej: Febrero 2026)"
+            value={uploadMonth}
+            onChange={(event) => setUploadMonth(event.target.value)}
+          />
+          <select
+            value={uploadMode}
+            onChange={(event) => setUploadMode(event.target.value)}
+            aria-label="Modo de carga"
+          >
+            <option value="replace">Reemplazar mes</option>
+            <option value="append">Acumular mes</option>
+          </select>
           <button type="submit" disabled={loading}>
             {loading ? "Subiendo..." : "Subir CSV"}
           </button>
@@ -186,6 +237,26 @@ export default function App() {
         <span className="cta__arrow" aria-hidden="true">→</span>
       </a>
 
+      <div className="filters">
+        <span>Mes seleccionado</span>
+        <select
+          value={selectedMonth}
+          onChange={(event) => setSelectedMonth(event.target.value)}
+          disabled={!months.length}
+          aria-label="Seleccionar mes"
+        >
+          {months.length ? (
+            months.map((month) => (
+              <option key={month} value={month}>
+                {month}
+              </option>
+            ))
+          ) : (
+            <option value="">Sin meses</option>
+          )}
+        </select>
+      </div>
+
       <section className="metrics">
         <div className="card">
           <span>Total de devoluciones</span>
@@ -204,7 +275,11 @@ export default function App() {
           <strong>{dashboard.total_tickets}</strong>
         </div>
         <div className="card card--highlight">
-          <span>Vendedor seleccionado (mes actual)</span>
+          <span>
+            {selectedMonth
+              ? `Vendedor seleccionado (${selectedMonth})`
+              : "Vendedor seleccionado"}
+          </span>
           <div className="card__select">
             <strong>{selectedVendor ? selectedVendor.vendedor : "-"}</strong>
             <select

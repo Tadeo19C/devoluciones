@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 .venv/
 venv/
+backend/data.db
 
 # Node
 node_modules/
