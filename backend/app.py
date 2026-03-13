@@ -31,6 +31,23 @@ def parse_csv_text(text: str) -> pd.DataFrame:
     return pd.read_csv(io.StringIO(payload))
 
 
+def parse_excel_bytes(raw: bytes) -> pd.DataFrame:
+    raw_df = pd.read_excel(io.BytesIO(raw), header=None)
+    header_index = None
+    for idx, value in enumerate(raw_df.iloc[:, 0].astype(str)):
+        if value.strip().upper().startswith("FECHA"):
+            header_index = idx
+            break
+
+    if header_index is None:
+        return pd.read_excel(io.BytesIO(raw))
+
+    header = raw_df.iloc[header_index].astype(str).tolist()
+    data = raw_df.iloc[header_index + 1 :].copy()
+    data.columns = header
+    return data
+
+
 def read_csv_with_header(source) -> pd.DataFrame:
     if isinstance(source, str):
         if not os.path.exists(source):
@@ -147,15 +164,22 @@ def upload_csv():
     try:
         raw = file.read()
         if isinstance(raw, bytes):
-            text = raw.decode("utf-8", errors="ignore")
+            pass
         else:
-            text = str(raw)
-        new_df = parse_csv_text(text)
+            raw = bytes(str(raw), "utf-8")
+
+        filename = (file.filename or "").lower()
+        if filename.endswith(".xlsx"):
+            new_df = parse_excel_bytes(raw)
+            text = new_df.to_csv(index=False)
+        else:
+            text = raw.decode("utf-8", errors="ignore")
+            new_df = parse_csv_text(text)
     except Exception as exc:  # noqa: BLE001
         return jsonify({"error": f"CSV inválido: {exc}"}), 400
 
     if new_df.empty:
-        return jsonify({"error": "CSV sin datos"}), 400
+        return jsonify({"error": "Archivo sin datos"}), 400
 
     with get_db() as connection:
         if mode == "replace":

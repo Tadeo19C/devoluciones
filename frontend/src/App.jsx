@@ -141,7 +141,7 @@ export default function App() {
   const handleUpload = async (event) => {
     event.preventDefault();
     if (!file) {
-      setError("Selecciona un archivo CSV");
+      setError("Selecciona un archivo CSV o Excel");
       return;
     }
     if (!uploadMonth.trim()) {
@@ -192,7 +192,7 @@ export default function App() {
         <form className="upload" onSubmit={handleUpload}>
           <input
             type="file"
-            accept=".csv"
+            accept=".csv,.xlsx"
             onChange={(event) => setFile(event.target.files?.[0] || null)}
           />
           <input
