@@ -13,6 +13,14 @@
 - Ejecuta el servidor con:
   - `python backend/app.py`
 
+### Verificacion rapida de carga CSV/XLSX
+
+- Ejecuta la prueba automatica:
+  - `/workspaces/devoluciones/.venv/bin/python backend/smoke_test_upload.py`
+
+Si todo funciona, mostrara:
+- `PASS: CSV y XLSX suben, actualizan dashboard y se guardan en SQLite.`
+
 El backend quedará disponible en `http://localhost:5000`.
 
 ## Frontend (React + Vite)
